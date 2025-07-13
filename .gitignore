@@ -107,8 +107,7 @@ com_crashlytics_export_strings.xml
 *.launch
 
 ## VSCode
-
-.vscode/
+# .vscode/ - now included in repository for cross-platform development
 
 ## NetBeans
 

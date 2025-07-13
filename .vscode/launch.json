@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug Desktop",
+            "request": "launch",
+            "mainClass": "mindustry.desktop.DesktopLauncher",
+            "projectName": "desktop",
+            "cwd": "${workspaceFolder}",
+            "vmArgs": "-Xmx4G -Djava.awt.headless=false",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "preLaunchTask": "Build Desktop"
+        },
+        {
+            "type": "java",
+            "name": "Debug Server",
+            "request": "launch",
+            "mainClass": "mindustry.server.ServerLauncher",
+            "projectName": "server",
+            "cwd": "${workspaceFolder}",
+            "vmArgs": "-Xmx2G",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "preLaunchTask": "Build Server"
+        },
+        {
+            "type": "java",
+            "name": "Attach to Remote Desktop",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005,
+            "timeout": 30000,
+            "preLaunchTask": "Debug Desktop"
+        }
+    ]
+} 

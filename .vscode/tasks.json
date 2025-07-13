@@ -1,0 +1,204 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Desktop",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["desktop:dist"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Собирает desktop версию игры в desktop/build/libs/Mindustry.jar"
+        },
+        {
+            "label": "Run Desktop",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["desktop:run"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Запускает desktop версию игры для разработки"
+        },
+        {
+            "label": "Run Desktop JAR",
+            "type": "shell",
+            "command": "java",
+            "args": ["-jar", "desktop/build/libs/Mindustry.jar"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Запускает собранную desktop версию из JAR файла",
+            "dependsOn": "Build Desktop"
+        },
+        {
+            "label": "Build Server",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["server:dist"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Собирает server версию в server/build/libs/server-release.jar"
+        },
+        {
+            "label": "Run Server",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["server:run"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Запускает сервер для разработки"
+        },
+        {
+            "label": "Pack Sprites",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["tools:pack"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Упаковывает спрайты из core/assets-raw в атласы"
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["clean"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Очищает директории сборки"
+        },
+        {
+            "label": "Clean Cache",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["clearCache"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Очищает кеш спрайтов"
+        },
+        {
+            "label": "Build All",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["build"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Собирает все модули проекта"
+        },
+        {
+            "label": "Test",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["test"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Запускает тесты"
+        },
+        {
+            "label": "Debug Desktop",
+            "type": "shell",
+            "command": "${workspaceFolder}/gradlew",
+            "windows": {
+                "command": "${workspaceFolder}/gradlew.bat"
+            },
+            "args": ["desktop:run", "--debug-jvm"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Запускает desktop версию с отладчиком на порту 5005"
+        }
+    ]
+} 

@@ -1,0 +1,42 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.project.sourcePaths": [
+        "core/src",
+        "desktop/src",
+        "server/src",
+        "annotations/src/main/java"
+    ],
+    "java.project.outputPath": "build/classes",
+    "java.debug.settings.enableRunDebugCodeLens": true,
+    "java.debug.settings.hotCodeReplace": "auto",
+    "java.completion.importOrder": [
+        "java",
+        "javax",
+        "com",
+        "org",
+        "arc",
+        "mindustry"
+    ],
+    "java.format.settings.url": "",
+    "java.format.settings.profile": "GoogleStyle",
+    "files.exclude": {
+        "**/build/": true,
+        "**/bin/": true,
+        "**/.gradle/": true,
+        "**/gradle/": false
+    },
+    "files.watcherExclude": {
+        "**/build/**": true,
+        "**/bin/**": true,
+        "**/.gradle/**": true,
+        "**/core/assets/sprites/**": true,
+        "**/core/assets/cache/**": true
+    },
+    "search.exclude": {
+        "**/build/": true,
+        "**/bin/": true,
+        "**/.gradle/": true,
+        "**/core/assets/sprites/**": true
+    }
+}
