@@ -1,0 +1,9 @@
+{
+   "name": "tank-t1",
+   "displayName": "Tank T1 Mod",
+   "author": "Tank T1 Mod Creator",
+   "description": "Independent mod featuring the tank-t1 unit with its own materials and factory",
+   "subtitle": "Tank T1 Unit",
+   "version": "1.0",
+   "minGameVersion": 146
+} 

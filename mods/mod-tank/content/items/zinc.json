@@ -1,0 +1,14 @@
+{
+  "name": "Zinc",
+  "description": "Metallic material for tank armor",
+  "hardness": 2,
+  "cost": 0.5,
+  "color": "577277FF",
+  "tier": 1,
+  "radioactivity": 0,
+  "flammability": 0,
+  "explosiveness": 0,
+  "research": {
+    "parent": "lead"
+  }
+} 

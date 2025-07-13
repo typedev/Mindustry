@@ -1,0 +1,57 @@
+{
+    "type": "tank",
+    "name": "tank-t1",
+    "description": "Fast assault tank with lightning weaponry",
+    "hitSize": 8,
+    "treadPullOffset": 3,
+    "omniMovement": false,
+    "faceTarget": true,
+    "outlineColor": "44413c",
+    "speed": 0.8,
+    "rotateSpeed": 7,
+    "health": 790,
+    "armor": 3,
+    "itemCapacity": 0,
+    "treadRects": [
+        {
+            "x": 9,
+            "y": -26,
+            "width": 18,
+            "height": 48
+        }
+    ],
+    "weapons": [
+        {
+            "x": 0,
+            "y": -1,
+            "name": "tank-t1-weapon",
+            "reload": 30,
+            "rotate": true,
+            "mirror": false,
+            "shootSound": "energy-blade-launch",
+            "bullet": {
+                "type": "basicBulletType",
+                "damage": 6,
+                "speed": 2,
+                "lifetime": 2.5,
+                "fragBullet": {
+                    "type": "LightningBulletType",
+                    "fragLifeMin": 3,
+                    "fragLifeMax": 5,
+                    "fragVelocityMin": 1,
+                    "fragVelocityMax": 1,
+                    "fragRandomSpread": 0,
+                    "fragBullets": 1,
+                    "lightningLength": 12,
+                    "damage": 6,
+                    "pierce": false,
+                    "pierceBuilding": false,
+                    "lightningColor": "e9c574"
+                }
+            }
+        }
+    ],
+    "research": {
+        "parent": "tank-fabricator"
+    }
+} 

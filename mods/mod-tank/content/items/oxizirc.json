@@ -1,0 +1,14 @@
+{
+  "name": "Oxizirc",
+  "description": "Advanced composite material for tank construction",
+  "hardness": 1,
+  "cost": 0.4,
+  "color": "B33831FF",
+  "tier": 1,
+  "radioactivity": 0,
+  "flammability": 0,
+  "explosiveness": 0,
+  "research": {
+    "parent": "copper"
+  }
+} 
