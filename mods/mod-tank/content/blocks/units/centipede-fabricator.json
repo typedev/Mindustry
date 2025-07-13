@@ -1,0 +1,38 @@
+{
+  "type": "UnitFactory",
+  "name": "Centipede Fabricator",
+  "description": "Advanced factory for producing multi-segment centipede units",
+  "size": 4,
+  "consumes": {
+    "power": 8.5
+  },
+  "plans": [
+    {
+      "unit": "centipede",
+      "requirements": [
+        {"item": "silicon", "amount": 80},
+        {"item": "plastanium", "amount": 60},
+        {"item": "thorium", "amount": 40},
+        {"item": "oxizirc", "amount": 50}
+      ],
+      "time": 4500
+    }
+  ],
+  "requirements": [
+    {"item": "silicon", "amount": 400},
+    {"item": "plastanium", "amount": 300},
+    {"item": "thorium", "amount": 200},
+    {"item": "oxizirc", "amount": 250},
+    {"item": "zinc", "amount": 350}
+  ],
+  "category": "units",
+  "research": {
+    "parent": "tank-fabricator",
+    "requirements": [
+      {"item": "silicon", "amount": 2000},
+      {"item": "plastanium", "amount": 1500},
+      {"item": "thorium", "amount": 1000},
+      {"item": "oxizirc", "amount": 1250}
+    ]
+  }
+} 
