@@ -29,7 +29,7 @@ if [ -d "$modPath" ]; then
         # Determine user mods directory based on OS
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS
-            userModsPath="/Users/alexander/Library/Application Support/Mindustry/mods"
+            userModsPath="/Users/$USER/Library/Application Support/Mindustry/mods"
         else
             # Linux
             userModsPath="$HOME/.local/share/Mindustry/mods"
@@ -39,7 +39,7 @@ if [ -d "$modPath" ]; then
         mkdir -p "$userModsPath"
         
         # Copy archive to user mods directory
-        if cp "$modName.zip" "$userModsPath/"; then
+        if cp "../$modName.zip" "$userModsPath/"; then
             echo "Mod $modName packed and copied to $userModsPath"
         else
             echo "Error: Failed to copy mod to $userModsPath"
@@ -60,6 +60,6 @@ else
     fi
 fi
 
-# Wait for user to press Enter before closing
-echo ""
-read -p "Press Enter to continue..." 
+# # Wait for user to press Enter before closing
+# echo ""
+# read -p "Press Enter to continue..." 
