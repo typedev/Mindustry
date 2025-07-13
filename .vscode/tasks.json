@@ -212,12 +212,10 @@
             "label": "Pack Mod",
             "type": "shell",
             "windows": {
-                "command": "powershell",
+                "command": "${workspaceFolder}\\pack-mod.bat",
                 "args": [
-                    "-ExecutionPolicy", "Bypass",
-                    "-File", "${workspaceFolder}/pack-mod.ps1",
-                    "-WorkspaceFolder", "${workspaceFolder}",
-                    "-ModName", "${input:modName}"
+                    "${workspaceFolder}",
+                    "${input:modName}"
                 ]
             },
             "osx": {

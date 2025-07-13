@@ -10,15 +10,20 @@ else
     modName="$MOD_NAME"
 fi
 
+# Remove any leading/trailing spaces from mod name
+modName=$(echo "$modName" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+# Remove any invalid filename characters
+modName=$(echo "$modName" | sed 's/[<>|?*"]//g')
+
 # Check if mod folder exists
 modPath="$WORKSPACE_FOLDER/mods/$modName"
 if [ -d "$modPath" ]; then
     echo "Packing mod: $modName"
     
-    # Change to mods directory and create ZIP archive
-    cd "$WORKSPACE_FOLDER/mods"
+    # Change to mod directory and create ZIP archive with contents only (exactly like manual selection)
+    cd "$WORKSPACE_FOLDER/mods/$modName"
     
-    if zip -r "$modName.zip" "$modName/"; then
+    if zip -r "../$modName.zip" *; then
         echo "Archive created: $WORKSPACE_FOLDER/mods/$modName.zip"
         
         # Determine user mods directory based on OS
