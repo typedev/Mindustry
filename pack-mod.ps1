@@ -20,7 +20,21 @@ if (Test-Path $modPath) {
     $modContents = Join-Path $modPath "*"
     
     try {
-        Compress-Archive -Path $modContents -DestinationPath $zipPath -Force
+        # Remove existing archive
+        if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+        
+        # Method: Use simpler approach - change to mod directory and use Compress-Archive
+        $currentLocation = Get-Location
+        Set-Location $modPath
+        
+        # Get all files and folders in current directory (including ZIP files to match manual creation)
+        $itemsToCompress = Get-ChildItem -Path "."
+        
+        # Create archive from current directory (exactly like manual selection)
+        Compress-Archive -Path $itemsToCompress.FullName -DestinationPath $zipPath -CompressionLevel Optimal -Force
+        
+        # Return to original location
+        Set-Location $currentLocation
         Write-Host "Archive created: $zipPath" -ForegroundColor Green
         
         # Create user mods directory if it doesn't exist
