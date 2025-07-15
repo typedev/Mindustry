@@ -15,7 +15,7 @@
         {"item": "thorium", "amount": 40},
         {"item": "oxizirc", "amount": 50}
       ],
-      "time": 4500
+      "time": 10
     }
   ],
   "requirements": [
