@@ -8,7 +8,7 @@ var snakeSystem = {
         var snake = {
             head: headUnit,
             segments: new Seq(),
-            maxSegments: 3,
+            maxSegments: 5,
             segmentSpacing: 10, // Уменьшаем расстояние между сегментами
             updateCounter: 0,
             headHistory: new Seq(), // История позиций головы для сглаживания
