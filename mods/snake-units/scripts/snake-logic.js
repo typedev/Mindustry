@@ -9,10 +9,10 @@ var snakeSystem = {
             head: headUnit,
             segments: new Seq(),
             maxSegments: 3,
-            segmentSpacing: 16,
+            segmentSpacing: 10, // Уменьшаем расстояние между сегментами
             updateCounter: 0,
             headHistory: new Seq(), // История позиций головы для сглаживания
-            historySize: 10,
+            historySize: 20, // Увеличиваем историю для лучшего сглаживания
             
             update() {
                 this.updateCounter++;
@@ -79,7 +79,7 @@ var snakeSystem = {
                 for (var i = this.segments.size - 1; i >= 0; i--) {
                     var segment = this.segments.get(i);
                     if (!segment || !segment.isValid()) {
-                        this.segments.removeIndex(i);
+                        this.segments.remove(i);
                     }
                 }
             },
@@ -91,14 +91,14 @@ var snakeSystem = {
                     
                     var target;
                     
-                    // Первый сегмент следует за сглаженной позицией головы
+                    // Первый сегмент следует за сглаженной позицией головы с небольшой задержкой
                     if (i === 0) {
-                        target = this.getSmoothedHeadPosition(2); // Небольшая задержка для сглаживания
+                        target = this.getSmoothedHeadPosition(3); // Уменьшаем задержку для меньшего расстояния
                     } else {
-                        // Остальные сегменты следуют за предыдущим сегментом
+                        // Остальные сегменты следуют за сглаженной позицией предыдущего сегмента
                         var prevSegment = this.segments.get(i - 1);
                         if (prevSegment && prevSegment.isValid()) {
-                            target = new Vec2(prevSegment.x, prevSegment.y);
+                            target = this.getSmoothedSegmentPosition(prevSegment, 2); // Уменьшаем сглаживание для меньшего расстояния
                         } else {
                             continue;
                         }
@@ -108,29 +108,41 @@ var snakeSystem = {
                     var dy = target.y - segment.y;
                     var dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    // Умное движение - мгновенное для больших расстояний, плавное для малых
-                    if (dist > this.segmentSpacing * 2) {
-                        // Большое расстояние - быстрое приближение
+                    // Минимальный порог движения для устранения дрожания
+                    var minMoveThreshold = 1.5;
+                    
+                    if (dist < minMoveThreshold) {
+                        // Слишком маленькое движение - игнорируем
+                        continue;
+                    }
+                    
+                    // Улучшенная логика движения
+                    if (dist > this.segmentSpacing * 2.0) {
+                        // Большое расстояние - мгновенная телепортация
                         var ratio = this.segmentSpacing / dist;
                         var desiredX = target.x - dx * ratio;
                         var desiredY = target.y - dy * ratio;
                         segment.set(desiredX, desiredY);
                         segment.rotation = Math.atan2(dy, dx) * 180 / Math.PI;
-                    } else if (dist > this.segmentSpacing) {
-                        // Среднее расстояние - плавная интерполяция с высокой скоростью
+                    } else if (dist > this.segmentSpacing * 0.7) {
+                        // Среднее расстояние - плавная интерполяция
                         var ratio = this.segmentSpacing / dist;
                         var desiredX = target.x - dx * ratio;
                         var desiredY = target.y - dy * ratio;
                         
-                        // Очень высокая скорость интерполяции для плавности
-                        var moveSpeed = 0.95;
+                        // Плавная интерполяция для устранения дрожания
+                        var moveSpeed = 0.25;
                         var moveX = (desiredX - segment.x) * moveSpeed;
                         var moveY = (desiredY - segment.y) * moveSpeed;
                         
-                        segment.set(segment.x + moveX, segment.y + moveY);
-                        segment.rotation = Math.atan2(moveY, moveX) * 180 / Math.PI;
+                        // Дополнительная фильтрация мелких движений
+                        var moveDistance = Math.sqrt(moveX * moveX + moveY * moveY);
+                        if (moveDistance > 0.5) {
+                            segment.set(segment.x + moveX, segment.y + moveY);
+                            segment.rotation = Math.atan2(moveY, moveX) * 180 / Math.PI;
+                        }
                     }
-                    // Если расстояние меньше segmentSpacing - не двигаемся (устраняет дрожание)
+                    // Если расстояние оптимальное - не двигаемся
                 }
             },
             
@@ -144,6 +156,26 @@ var snakeSystem = {
                 } else {
                     return new Vec2(this.head.x, this.head.y);
                 }
+            },
+            
+            getSmoothedSegmentPosition(segment, smoothingFactor) {
+                // Возвращаем слегка сглаженную позицию сегмента
+                // Чем больше smoothingFactor, тем больше сглаживания
+                var currentPos = new Vec2(segment.x, segment.y);
+                
+                // Простое сглаживание - берем среднее между текущей и предыдущей позициями
+                if (segment.lastX !== undefined && segment.lastY !== undefined) {
+                    var smoothingAmount = 1.0 / smoothingFactor;
+                    var smoothedX = segment.lastX + (currentPos.x - segment.lastX) * smoothingAmount;
+                    var smoothedY = segment.lastY + (currentPos.y - segment.lastY) * smoothingAmount;
+                    currentPos = new Vec2(smoothedX, smoothedY);
+                }
+                
+                // Сохраняем текущую позицию для следующего кадра
+                segment.lastX = segment.x;
+                segment.lastY = segment.y;
+                
+                return currentPos;
             },
             
             cleanup() {
