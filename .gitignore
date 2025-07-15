@@ -173,3 +173,4 @@ core/assets-raw/sprites/ui/sectors/*.json
 
 # mods
 mods/*.zip
+core/assets/fonts/*

@@ -1,0 +1,10 @@
+{
+  "name": "snake-units",
+  "displayName": "Snake Units",
+  "author": "YourName",
+  "description": "Добавляет юниты-змеи с сегментами, следующими за головой",
+  "version": "1.0",
+  "minGameVersion": "136",
+  "dependencies": [],
+  "hidden": false
+}

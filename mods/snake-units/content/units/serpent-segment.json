@@ -1,0 +1,25 @@
+{
+  "type": "flying",
+  "name": "Serpent Segment",
+  "description": "Snake body segment that follows the head.",
+  "health": 150,
+  "speed": 1.5,
+  "flying": true,
+  "lowAltitude": true,
+  "hitSize": 6,
+  "armor": 0,
+  "weapons": [],
+  "research": {
+    "parent": "serpent-head",
+    "requirements": [
+      {
+        "item": "silicon",
+        "amount": 50
+      },
+      {
+        "item": "lead",
+        "amount": 30
+      }
+    ]
+  }
+} 

@@ -1,0 +1,24 @@
+{
+  "type": "flying",
+  "name": "Serpent Head",
+  "description": "Simple flying serpent unit.",
+  "health": 200,
+  "speed": 1.5,
+  "flying": true,
+  "lowAltitude": true,
+  "hitSize": 8,
+  "armor": 1,
+  "research": {
+    "parent": "flare",
+    "requirements": [
+      {
+        "item": "silicon",
+        "amount": 100
+      },
+      {
+        "item": "lead",
+        "amount": 50
+      }
+    ]
+  }
+} 
