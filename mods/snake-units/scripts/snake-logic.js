@@ -11,9 +11,18 @@ var snakeSystem = {
             maxSegments: 3,
             segmentSpacing: 16,
             updateCounter: 0,
+            headHistory: new Seq(), // История позиций головы для сглаживания
+            historySize: 10,
             
             update() {
                 this.updateCounter++;
+                
+                // Записываем историю позиций головы
+                var headPos = new Vec2(this.head.x, this.head.y);
+                this.headHistory.add(headPos);
+                while (this.headHistory.size > this.historySize) {
+                    this.headHistory.remove(0);
+                }
                 
                 // Не проверяем isValid() слишком часто - только каждые 20 обновлений
                 if (this.updateCounter % 20 === 0) {
@@ -82,9 +91,9 @@ var snakeSystem = {
                     
                     var target;
                     
-                    // Первый сегмент следует за головой
+                    // Первый сегмент следует за сглаженной позицией головы
                     if (i === 0) {
-                        target = new Vec2(this.head.x, this.head.y);
+                        target = this.getSmoothedHeadPosition(2); // Небольшая задержка для сглаживания
                     } else {
                         // Остальные сегменты следуют за предыдущим сегментом
                         var prevSegment = this.segments.get(i - 1);
@@ -99,25 +108,41 @@ var snakeSystem = {
                     var dy = target.y - segment.y;
                     var dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    // Двигаемся к цели если расстояние больше segmentSpacing
-                    if (dist > this.segmentSpacing) {
-                        // Вычисляем желаемую позицию на расстоянии segmentSpacing от цели
+                    // Умное движение - мгновенное для больших расстояний, плавное для малых
+                    if (dist > this.segmentSpacing * 2) {
+                        // Большое расстояние - быстрое приближение
+                        var ratio = this.segmentSpacing / dist;
+                        var desiredX = target.x - dx * ratio;
+                        var desiredY = target.y - dy * ratio;
+                        segment.set(desiredX, desiredY);
+                        segment.rotation = Math.atan2(dy, dx) * 180 / Math.PI;
+                    } else if (dist > this.segmentSpacing) {
+                        // Среднее расстояние - плавная интерполяция с высокой скоростью
                         var ratio = this.segmentSpacing / dist;
                         var desiredX = target.x - dx * ratio;
                         var desiredY = target.y - dy * ratio;
                         
-                        // Быстрое плавное движение к желаемой позиции
-                        var moveSpeed = 0.8; // Увеличил скорость для очень быстрого отклика
+                        // Очень высокая скорость интерполяции для плавности
+                        var moveSpeed = 0.95;
                         var moveX = (desiredX - segment.x) * moveSpeed;
                         var moveY = (desiredY - segment.y) * moveSpeed;
                         
                         segment.set(segment.x + moveX, segment.y + moveY);
-                        
-                        // Поворачиваем сегмент в направлении движения
-                        if (Math.abs(moveX) > 0.1 || Math.abs(moveY) > 0.1) {
-                            segment.rotation = Math.atan2(moveY, moveX) * 180 / Math.PI;
-                        }
+                        segment.rotation = Math.atan2(moveY, moveX) * 180 / Math.PI;
                     }
+                    // Если расстояние меньше segmentSpacing - не двигаемся (устраняет дрожание)
+                }
+            },
+            
+            getSmoothedHeadPosition(delay) {
+                // Возвращаем позицию головы с небольшой задержкой для сглаживания
+                var historyIndex = this.headHistory.size - 1 - delay;
+                if (historyIndex >= 0 && historyIndex < this.headHistory.size) {
+                    return this.headHistory.get(historyIndex);
+                } else if (this.headHistory.size > 0) {
+                    return this.headHistory.get(this.headHistory.size - 1);
+                } else {
+                    return new Vec2(this.head.x, this.head.y);
                 }
             },
             
@@ -129,6 +154,7 @@ var snakeSystem = {
                     }
                 }));
                 this.segments.clear();
+                this.headHistory.clear();
                 snakeSystem.snakes.remove(this.head.id);
             }
         };
@@ -176,10 +202,10 @@ Events.on(EventType.UnitCreateEvent, cons(event => {
     }
 }));
 
-// Global update timer - баланс между плавностью и производительностью
+// Global update timer - максимальная частота для идеальной плавности
 Timer.schedule(() => {
     snakeSystem.update();
-}, 0, 0.05); // Обновление каждые 50ms для очень плавного движения
+}, 0, 0.016); // Обновление каждые 16ms (~60 FPS) для максимальной плавности
 
 // Cleanup when units are destroyed
 Events.on(EventType.UnitDestroyEvent, cons(event => {
