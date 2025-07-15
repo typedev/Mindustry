@@ -1,9 +1,170 @@
 // Snake Unit Logic for Mindustry
 print("[Snake] Loading snake logic...");
 
-var snakeHeads = new java.util.HashMap();
+var snakeSystem = {
+    snakes: new java.util.HashMap(),
+    
+    createSnake(headUnit) {
+        var snake = {
+            head: headUnit,
+            segments: new Seq(),
+            maxSegments: 3,
+            segmentSpacing: 16,
+            updateCounter: 0,
+            
+            update() {
+                this.updateCounter++;
+                
+                // Не проверяем isValid() слишком часто - только каждые 20 обновлений
+                if (this.updateCounter % 20 === 0) {
+                    if (!this.head.isValid()) {
+                        print("[Snake] Head " + this.head.id + " became invalid after " + this.updateCounter + " updates");
+                        this.cleanup();
+                        return false;
+                    }
+                }
+                
+                // Создаем сегменты после небольшой задержки
+                if (this.segments.size === 0 && this.updateCounter > 5) {
+                    this.spawnSegments();
+                }
+                
+                // Очищаем невалидные сегменты
+                this.cleanupInvalidSegments();
+                
+                // Обновляем позиции сегментов
+                this.updateSegments();
+                
+                return true;
+            },
+            
+            spawnSegments() {
+                var segmentType = null;
+                Vars.content.units().each(cons(unitType => {
+                    if (unitType.name.equals("snake-units-serpent-segment")) {
+                        segmentType = unitType;
+                    }
+                }));
+                
+                if (!segmentType) {
+                    print("[Snake] ERROR: Segment type not found!");
+                    return;
+                }
+                
+                print("[Snake] Spawning segments for head " + this.head.id);
+                
+                // Создаем сегменты позади головы
+                for (var i = 0; i < this.maxSegments; i++) {
+                    var offsetDistance = (i + 1) * this.segmentSpacing;
+                    var segment = segmentType.spawn(
+                        this.head.x - offsetDistance, 
+                        this.head.y
+                    );
+                    segment.team = this.head.team;
+                    this.segments.add(segment);
+                }
+                print("[Snake] Spawned " + this.segments.size + " segments");
+            },
+            
+            cleanupInvalidSegments() {
+                for (var i = this.segments.size - 1; i >= 0; i--) {
+                    var segment = this.segments.get(i);
+                    if (!segment || !segment.isValid()) {
+                        this.segments.removeIndex(i);
+                    }
+                }
+            },
+            
+            updateSegments() {
+                for (var i = 0; i < this.segments.size; i++) {
+                    var segment = this.segments.get(i);
+                    if (!segment || !segment.isValid()) continue;
+                    
+                    var target;
+                    
+                    // Первый сегмент следует за головой
+                    if (i === 0) {
+                        target = new Vec2(this.head.x, this.head.y);
+                    } else {
+                        // Остальные сегменты следуют за предыдущим сегментом
+                        var prevSegment = this.segments.get(i - 1);
+                        if (prevSegment && prevSegment.isValid()) {
+                            target = new Vec2(prevSegment.x, prevSegment.y);
+                        } else {
+                            continue;
+                        }
+                    }
+                    
+                    var dx = target.x - segment.x;
+                    var dy = target.y - segment.y;
+                    var dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Двигаемся к цели если расстояние больше segmentSpacing
+                    if (dist > this.segmentSpacing) {
+                        // Вычисляем желаемую позицию на расстоянии segmentSpacing от цели
+                        var ratio = this.segmentSpacing / dist;
+                        var desiredX = target.x - dx * ratio;
+                        var desiredY = target.y - dy * ratio;
+                        
+                        // Быстрое плавное движение к желаемой позиции
+                        var moveSpeed = 0.8; // Увеличил скорость для очень быстрого отклика
+                        var moveX = (desiredX - segment.x) * moveSpeed;
+                        var moveY = (desiredY - segment.y) * moveSpeed;
+                        
+                        segment.set(segment.x + moveX, segment.y + moveY);
+                        
+                        // Поворачиваем сегмент в направлении движения
+                        if (Math.abs(moveX) > 0.1 || Math.abs(moveY) > 0.1) {
+                            segment.rotation = Math.atan2(moveY, moveX) * 180 / Math.PI;
+                        }
+                    }
+                }
+            },
+            
+            cleanup() {
+                print("[Snake] Cleaning up snake " + this.head.id);
+                this.segments.each(cons(segment => {
+                    if (segment && segment.isValid()) {
+                        segment.kill();
+                    }
+                }));
+                this.segments.clear();
+                snakeSystem.snakes.remove(this.head.id);
+            }
+        };
+        
+        this.snakes.put(headUnit.id, snake);
+        print("[Snake] Created snake for head " + headUnit.id);
+        return snake;
+    },
+    
+    update() {
+        var iterator = this.snakes.values().iterator();
+        var snakesToRemove = new Seq();
+        
+        while (iterator.hasNext()) {
+            var snake = iterator.next();
+            if (!snake.update()) {
+                snakesToRemove.add(snake.head.id);
+            }
+        }
+        
+        // Удаляем неактивные змеи
+        snakesToRemove.each(cons(headId => {
+            this.snakes.remove(headId);
+        }));
+    },
+    
+    getSnake(headUnit) {
+        return this.snakes.get(headUnit.id);
+    },
+    
+    hasSnake(headUnit) {
+        return this.snakes.containsKey(headUnit.id);
+    }
+};
 
-// Event to apply snake AI to new serpent-head units
+// Event to register new serpent-head units
 Events.on(EventType.UnitCreateEvent, cons(event => {
     if (!event.unit) return;
     
@@ -11,150 +172,25 @@ Events.on(EventType.UnitCreateEvent, cons(event => {
     
     // Check if this is a serpent head
     if (unit.type && unit.type.name.equals("snake-units-serpent-head")) {
-        print("[Snake] Serpent head detected!");
-        
-        try {
-            var snakeAI = extend(AIController, {
-                segments: new Seq(),
-                trail: new Seq(),
-                maxSegments: 3,
-                trailLength: 100,
-                segmentSpacing: 8,
-                headUnit: unit,
-                
-                updateUnit() {
-                    this.super$updateUnit();
-                    
-                    // Record position
-                    var pos = new Vec2(this.headUnit.x, this.headUnit.y);
-                    if (this.trail.add) {
-                        this.trail.add(pos);
-                    } else {
-                        this.trail.push(pos);
-                    }
-                    
-                    // Limit trail size - handle both Seq and JS arrays
-                    if (this.trail.removeIndex) {
-                        // This is a Seq object
-                        while (this.trail.size > this.trailLength) {
-                            this.trail.removeIndex(0);
-                        }
-                    } else {
-                        // This is a JS array
-                        while (this.trail.length > this.trailLength) {
-                            this.trail.shift();
-                        }
-                    }
-                    
-                    // Spawn segments if needed
-                    var segmentCount = this.segments.add ? this.segments.size : this.segments.length;
-                    if (segmentCount === 0) {
-                        this.spawnSegments();
-                    }
-                    
-                    // Update segment positions
-                    this.updateSegments();
-                },
-                
-                spawnSegments() {
-                    var segmentType = null;
-                    Vars.content.units().each(cons(unitType => {
-                        if (unitType.name.equals("snake-units-serpent-segment")) {
-                            segmentType = unitType;
-                        }
-                    }));
-                    
-                    if (!segmentType) {
-                        print("[Snake] Segment type not found");
-                        return;
-                    }
-                    
-                    // Spawn segments behind the head
-                    for (var i = 0; i < this.maxSegments; i++) {
-                        var offsetDistance = (i + 1) * 16;
-                        var segment = segmentType.spawn(
-                            this.headUnit.x - offsetDistance, 
-                            this.headUnit.y
-                        );
-                        segment.team = this.headUnit.team;
-                        
-                        // Add initial trail positions for immediate following
-                        for (var j = 0; j < offsetDistance / 2; j++) {
-                            var trailPos = new Vec2(this.headUnit.x - j * 2, this.headUnit.y);
-                            if (this.trail.add) {
-                                this.trail.add(trailPos);
-                            } else {
-                                this.trail.push(trailPos);
-                            }
-                        }
-                        
-                        if (this.segments.add) {
-                            this.segments.add(segment);
-                        } else {
-                            this.segments.push(segment);
-                        }
-                    }
-                    print("[Snake] Spawned " + this.maxSegments + " segments");
-                },
-                
-                updateSegments() {
-                    var segmentCount = this.segments.add ? this.segments.size : this.segments.length;
-                    var trailSize = this.trail.add ? this.trail.size : this.trail.length;
-                    
-                    for (var i = 0; i < segmentCount; i++) {
-                        var segment = this.segments.get ? this.segments.get(i) : this.segments[i];
-                        if (!segment.isValid()) continue;
-                        
-                        // Calculate target position in trail
-                        var targetIndex = (i + 1) * this.segmentSpacing;
-                        
-                        if (trailSize > targetIndex) {
-                            var target = this.trail.get ? 
-                                this.trail.get(trailSize - 1 - targetIndex) : 
-                                this.trail[trailSize - 1 - targetIndex];
-                            
-                            var dx = target.x - segment.x;
-                            var dy = target.y - segment.y;
-                            var dist = Math.sqrt(dx * dx + dy * dy);
-                            
-                            // More responsive movement
-                            if (dist > 4) {
-                                var speed = Math.min(dist * 0.15, 3.0);
-                                var moveX = (dx / dist) * speed;
-                                var moveY = (dy / dist) * speed;
-                                
-                                segment.set(segment.x + moveX, segment.y + moveY);
-                                segment.rotation = Math.atan2(moveY, moveX) * 180 / Math.PI;
-                            }
-                        }
-                    }
-                },
-                
-                removed() {
-                    print("[Snake] Cleaning up segments");
-                    if (this.segments.each) {
-                        this.segments.each(cons(segment => {
-                            if (segment.isValid()) {
-                                segment.kill();
-                            }
-                        }));
-                    } else {
-                        for (var i = 0; i < this.segments.length; i++) {
-                            var segment = this.segments[i];
-                            if (segment.isValid()) {
-                                segment.kill();
-                            }
-                        }
-                    }
-                    snakeHeads.remove(this.headUnit.id);
-                }
-            });
-            
-            unit.controller(snakeAI);
-            snakeHeads.put(unit.id, snakeAI);
-            print("[Snake] Snake AI applied successfully");
-        } catch (e) {
-            print("[Snake] Error applying AI: " + e);
+        snakeSystem.createSnake(unit);
+    }
+}));
+
+// Global update timer - баланс между плавностью и производительностью
+Timer.schedule(() => {
+    snakeSystem.update();
+}, 0, 0.05); // Обновление каждые 50ms для очень плавного движения
+
+// Cleanup when units are destroyed
+Events.on(EventType.UnitDestroyEvent, cons(event => {
+    if (!event.unit) return;
+    
+    var unit = event.unit;
+    
+    if (unit.type && unit.type.name.equals("snake-units-serpent-head")) {
+        var snake = snakeSystem.getSnake(unit);
+        if (snake) {
+            snake.cleanup();
         }
     }
 }));
